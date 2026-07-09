@@ -1,0 +1,6 @@
+{
+  "name": "SmartStadiumAI",
+  "description": "Multi-Agent Biosphere & Climate-Economic Policy Digital Twin Simulation Engine powered by Gemini 3.5 server-side cognitive decision intelligence, customized for SmartStadiumAI operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
