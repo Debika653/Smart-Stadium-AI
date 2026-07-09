@@ -46,60 +46,59 @@ app.get("/api/health", (req, res) => {
 app.post("/api/simulation/agent-negotiate", async (req, res) => {
   try {
     const {
-      gdp,
-      resources,
-      co2,
-      tech,
-      social,
-      carbonTax,
-      techSubsidies,
-      resourceQuota,
-      welfareDividend,
+      crowdFlow,
+      transitFlow,
+      carbonEmission,
+      smartGrid,
+      staffReadiness,
+      greenPower,
+      smartRouting,
+      transitDispatch,
+      staffSupport,
       crisisEvent,
-      historicalLog,
     } = req.body;
 
     // Check if API key is present; if not, return fallback data gracefully
     if (!process.env.GEMINI_API_KEY) {
       console.warn("GEMINI_API_KEY is not defined. Using rule-based fallback negotiation model.");
-      return res.json(getFallbackNegotiation(gdp, resources, co2, tech, social, crisisEvent));
+      return res.json(getFallbackNegotiation(crowdFlow, transitFlow, carbonEmission, smartGrid, staffReadiness, crisisEvent));
     }
 
     const ai = getGeminiClient();
 
-    const systemInstruction = `You are the core cognitive engine of the Aethera Digital Twin. 
-Your task is to simulate a high-stakes, hyper-realistic geopolitical and socio-ecological debate between four powerful global factions facing an acute crisis.
-The factions are:
-1. Sovereign Syndicate (ID: "sovereign", color: Amber): Focuses on industrial output, GDP growth, securing material sovereignty, and corporate dominance. Prone to resource hoarding but fears public revolt.
-2. Eco-Alliance (ID: "eco", color: Emerald): Focuses on stabilizing ecological boundaries, reducing carbon emissions, restoring natural capital, and implementing strict resource limits.
-3. Tech-Futurist Coalition (ID: "tech", color: Cyan): Focuses on R&D acceleration, geoengineering, planetary adaptation, nuclear fusion, and automation. Believes technology solves all ecological shortages.
-4. Citizen Assembly (ID: "citizen", color: Rose): Focuses on equal resource dividends, wage growth, social security, direct democracy, and planetary habitability for humans. Hates corporate exploitation and carbon taxes that harm the poor.
+    const systemInstruction = `You are the core cognitive engine of the Smart Stadium AI Digital Twin. 
+Your task is to simulate a high-stakes, hyper-realistic tournament operations debate between four powerful stadium control delegates facing an acute match-day incident.
+The delegates are:
+1. Stadium Operations Director (ID: "stadium_ops", color: Amber): Focuses on stadium logistics, bottleneck mitigation, maximum shuttle utilization, and venue throughput.
+2. Sustainability Manager (ID: "eco_sustainability", color: Emerald): Focuses on carbon neutrality, maximizing solar microgrid usage, minimizing compost/waste overflow, and clean operations.
+3. Fan Experience Coordinator (ID: "fan_experience", color: Cyan): Focuses on volunteer readiness, fan translation assistance, wheelchair & accessibility, and overall seating satisfaction.
+4. Safety Command Center (ID: "safety_security", color: Rose): Focuses on gate entry security, crowd safety indexes, fire code compliance, and direct incident suppression.
 
 Current State Dials:
-- Global GDP: ${gdp.toFixed(1)}T USD
-- Natural Capital Reserve: ${resources.toFixed(1)}% (shortage triggers societal shock)
-- Global Temp Rise: ${co2.toFixed(2)}°C above pre-industrial levels (elevated temp increases climate shocks)
-- Technology Index: ${tech.toFixed(1)} (increases efficiency and buffers shocks)
-- Social Stability: ${social.toFixed(1)}% (low stability leads to collapse)
+- Crowd Safety Index: ${crowdFlow.toFixed(1)}% (critical crowd bottleneck triggers alert)
+- Transit Logistics: ${transitFlow.toFixed(1)}% (shortage triggers gridlock delays)
+- Carbon Footprint: ${carbonEmission.toFixed(2)}t per active match (high emissions damage green compliance)
+- AI Smart Grid Index: ${smartGrid.toFixed(1)} (increases computational computer vision and camera accuracy)
+- Volunteer Readiness: ${staffReadiness.toFixed(1)}% (low readiness triggers volunteer burnout warnings)
 
-Active Executive Policies (Set by global coordinator):
-- Carbon Tax Rate: ${carbonTax}%
-- Technology R&D Subsidies: ${techSubsidies}%
-- Material Extraction Resource Quota: ${resourceQuota}%
-- Human Welfare Dividend: ${welfareDividend}%
+Active Executive Sliders:
+- Green Solar Power Allocation: ${greenPower}%
+- AI Crowd Routing & Tech: ${smartRouting}%
+- Transit Shuttles Dispatch: ${transitDispatch}%
+- Volunteer Incentives & Support: ${staffSupport}%
 
-Active Crisis Event:
+Active Match-Day Incident:
 Title: "${crisisEvent.title}"
 Severity: ${crisisEvent.severity}/10
 Description: "${crisisEvent.description}"
 
-Analyze how this crisis affects each faction, trigger a simulated diplomatic council meeting, and output a detailed decision matrix. Each faction has 10 negotiation tokens. They allocate them to policies that resolve the crisis in their favor.
+Analyze how this incident affects each operational department, trigger a simulated logistics debate, and output a detailed decision matrix. Each delegate has 10 negotiation tokens. They allocate them to proposals that resolve the bottleneck in their favor.
 Provide:
-1. A highly immersive statement from each faction representing their ideology and strategic posture.
-2. The private, tactical 'internalReasoning' for each agent explaining their hidden compromises, backroom deals, or cognitive strategy.
+1. A highly professional, immersive statement from each representative reacting to the incident and active sliders.
+2. The private, tactical 'internalReasoning' for each agent explaining their hidden worries, resource trade-offs, or scheduling compromises.
 3. A breakdown of token allocations (must sum to exactly 10 per agent).
 4. A master negotiation summary.
-5. Mathematical modifiers that will cascade into the simulator's system dynamics state variables for the next round. Keep modifications subtle, balanced, and realistic (values generally between -0.1 and +0.1, reflecting the systemic friction of changing global trends).`;
+5. Mathematical modifiers that will cascade into the simulator's state variables for the next tick. Keep modifications subtle, balanced, and realistic (values generally between -5.0 and +5.0 for percentage values, and -0.1 to +0.1 for the carbon emission metrics, reflecting systemic friction of physical movements).`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",
@@ -118,37 +117,43 @@ Provide:
                 type: Type.OBJECT,
                 required: ["id", "name", "statement", "internalReasoning", "tokenAllocation", "policyVote"],
                 properties: {
-                  id: { type: Type.STRING, description: "Must be 'sovereign', 'eco', 'tech', or 'citizen'" },
+                  id: { type: Type.STRING, description: "Must be 'stadium_ops', 'eco_sustainability', 'fan_experience', or 'safety_security'" },
                   name: { type: Type.STRING },
-                  statement: { type: Type.STRING, description: "A high-fidelity speech or position statement reacting to the crisis and the current executive sliders." },
-                  internalReasoning: { type: Type.STRING, description: "Their private cognitive thoughts and backroom strategy." },
+                  statement: { type: Type.STRING, description: "Position statement reacting to the incident and the current executive sliders." },
+                  internalReasoning: { type: Type.STRING, description: "Private operational trade-offs and backend logistics strategy." },
                   tokenAllocation: { type: Type.INTEGER, description: "Number of negotiation tokens (0-10) backing their proposal." },
-                  policyVote: { type: Type.STRING, description: "Their proposed policy or focus area to address the crisis." },
+                  policyVote: { type: Type.STRING, description: "Their proposed operational focus area to address the incident." },
                 },
               },
             },
             negotiationSummary: {
               type: Type.STRING,
-              description: "A summary of how the debates unfolded, alliances made, or conflicts generated between factions.",
+              description: "A summary of how the debates unfolded, consensus made, or conflicts between operational heads.",
             },
             modifiers: {
               type: Type.OBJECT,
-              required: ["gdpModifier", "resourceModifier", "co2Modifier", "techModifier", "socialModifier"],
+              required: [
+                "crowdFlowModifier",
+                "transitFlowModifier",
+                "carbonEmissionModifier",
+                "smartGridModifier",
+                "staffReadinessModifier"
+              ],
               properties: {
-                gdpModifier: { type: Type.NUMBER, description: "Impact on GDP growth rate (e.g. -0.05 to +0.05)" },
-                resourceModifier: { type: Type.NUMBER, description: "Impact on Resource recovery rate" },
-                co2Modifier: { type: Type.NUMBER, description: "Impact on CO2 emission rate" },
-                techModifier: { type: Type.NUMBER, description: "Impact on technological innovation acceleration" },
-                socialModifier: { type: Type.NUMBER, description: "Impact on global social stability" },
+                crowdFlowModifier: { type: Type.NUMBER, description: "Impact on Crowd Safety Index (percentage point change, e.g. -3 to +3)" },
+                transitFlowModifier: { type: Type.NUMBER, description: "Impact on Transit Logistics (percentage point change)" },
+                carbonEmissionModifier: { type: Type.NUMBER, description: "Impact on Carbon Footprint (tons deviation, e.g. -0.1 to +0.1)" },
+                smartGridModifier: { type: Type.NUMBER, description: "Impact on Smart Grid capacity" },
+                staffReadinessModifier: { type: Type.NUMBER, description: "Impact on Volunteer Readiness" },
               },
             },
             crisisResolutionTitle: {
               type: Type.STRING,
-              description: "The name of the consensus decree or systemic compromise reached.",
+              description: "The name of the compromise operational decree reached.",
             },
             crisisResolutionText: {
               type: Type.STRING,
-              description: "A detailed breakdown of how the crisis was resolved or exacerbated based on the council's actions.",
+              description: "A detailed breakdown of how the incident was mitigated or managed based on the council's actions.",
             },
           },
         },
@@ -168,61 +173,60 @@ Provide:
 
 // High-fidelity fallback logic when GEMINI_API_KEY is not configured
 function getFallbackNegotiation(
-  gdp: number,
-  resources: number,
-  co2: number,
-  tech: number,
-  social: number,
+  crowdFlow: number,
+  transitFlow: number,
+  carbonEmission: number,
+  smartGrid: number,
+  staffReadiness: number,
   crisisEvent: any
 ) {
-  // Deterministic but highly thematic responses that emulate agent negotiations
   const baseIntensity = crisisEvent.severity / 10;
   
   return {
     agents: [
       {
-        id: "sovereign",
-        name: "Sovereign Syndicate",
-        statement: `The crisis of "${crisisEvent.title}" demands resource hoarding, not eco-regulations. Global GDP stands at $${gdp.toFixed(1)}T and we cannot risk deceleration. We must expand extraction operations immediately to buffer supply chains!`,
-        internalReasoning: "We are exploiting the emergency to secure fast-track drilling permits while the Citizen Assembly is distracted by social welfare concerns.",
+        id: "stadium_ops",
+        name: "Stadium Operations Director",
+        statement: `The active incident "${crisisEvent.title}" threatens stadium gate access. Crowd safety stands at ${crowdFlow.toFixed(1)}%. We must dispatch additional transit loop shuttles and redirect fan flow to open side-gates immediately!`,
+        internalReasoning: "We are worried that high shuttle demand will overload our current fleet capacity, requiring us to draw power from the main grid backup.",
         tokenAllocation: 8,
-        policyVote: "Emergency Supply Chain Subsidies",
+        policyVote: "Emergency Gate Redirection Protocol",
       },
       {
-        id: "eco",
-        name: "Eco-Alliance",
-        statement: `This crisis represents planetary boundary feedback in action! Temperatures are at +${co2.toFixed(2)}°C. We must enforce strict material extraction quotas and hike carbon taxes to fund biosphere remediation before social stability collapses entirely.`,
-        internalReasoning: "Our modeling proves resource scarcity will trigger run-away industrial failures. We are using this shock to demand immediate limits on carbon emission caps.",
+        id: "eco_sustainability",
+        name: "Sustainability Manager",
+        statement: `Even in emergency mode, carbon footprint sits at ${carbonEmission.toFixed(2)}t. We must sustain our solar microgrid allocation. Relying on fossil fuel generators will violate carbon neutrality goals.`,
+        internalReasoning: "If we start diesel generators, we will fail our green compliance score. We are pushing for smart solar grid priority.",
         tokenAllocation: 7,
-        policyVote: "Global Carbon & Extraction Cap",
+        policyVote: "Solar Microgrid Priority Dispatch",
       },
       {
-        id: "tech",
-        name: "Tech-Futurist Coalition",
-        statement: `Biosphere limitations are engineering failures. Our current Tech level is ${tech.toFixed(1)}. With targeted capital infusions, we can scale atmospheric scrubbers, geothermal fusion, and autonomous logistics systems to bypass these natural scarcity limits.`,
-        internalReasoning: "By positioning geoengineering as the sole escape route, we secure massive public subsidies for our proprietary laboratory platforms.",
+        id: "fan_experience",
+        name: "Fan Experience Coordinator",
+        statement: `Volunteer Readiness is at ${staffReadiness.toFixed(1)}%. Staff are overwhelmed by the incident. We need volunteer support and real-time smart routing translation aids to prevent immediate exhaustion.`,
+        internalReasoning: "If volunteers begin quitting, gate congestion will rise. We are allocating tokens to incentivize volunteer morale.",
         tokenAllocation: 9,
-        policyVote: "Advanced Geoengineering Subsidies",
+        policyVote: "Volunteer Support & Shift Rotation",
       },
       {
-        id: "citizen",
-        name: "Citizen Assembly",
-        statement: `Our communities are bearing the direct brunt of "${crisisEvent.title}". Social Stability has drifted to ${social.toFixed(1)}%. We refuse to pay for corporate carbon taxes. We demand direct, unconditional human welfare dividends funded by Sovereign mineral yields!`,
-        internalReasoning: "We are ready to strike and shutdown critical transit grids if resource allocations do not prioritize worker dividend protection immediately.",
+        id: "safety_security",
+        name: "Safety Command Center",
+        statement: `With AI grid index at ${smartGrid.toFixed(1)}, our computer vision camera arrays are detecting bottlenecks at Gate 4. We demand real-time gate splitting security to suppress congestion spikes before code violations occur.`,
+        internalReasoning: "We are ready to deploy barricades to filter crowds safely if dynamic gate routing is not backed by full operations staff.",
         tokenAllocation: 9,
-        policyVote: "Universal Resource Dividend",
+        policyVote: "Computer Vision Bottleneck Splitting",
       },
     ],
-    negotiationSummary: `Factions clashed intensely over "${crisisEvent.title}". The Sovereign Syndicate attempted to push for unchecked material exploitation, triggering an immediate and organized threat of general strikes from the Citizen Assembly. The Eco-Alliance successfully forged a temporary coalition with the Tech-Futurists to integrate biosphere monitoring into high-yield R&D initiatives, bypassing some industrial objections.`,
+    negotiationSummary: `Operations chiefs debated intensely over "${crisisEvent.title}". Stadium Ops sought to open auxiliary gates, but Safety demanded physical screening barriers to prevent stampede risks. Fan Experience successfully negotiated a rotation plan for exhausted volunteers, backed by solar-powered real-time translators proposed by Sustainability.`,
     modifiers: {
-      gdpModifier: -0.02 * baseIntensity,
-      resourceModifier: -0.015 * baseIntensity,
-      co2Modifier: -0.01 * baseIntensity,
-      techModifier: 0.03 * baseIntensity,
-      socialModifier: -0.025 * baseIntensity,
+      crowdFlowModifier: 3.5 * baseIntensity,
+      transitFlowModifier: -2.1 * baseIntensity,
+      carbonEmissionModifier: -0.05 * baseIntensity,
+      smartGridModifier: 1.5 * baseIntensity,
+      staffReadinessModifier: -1.8 * baseIntensity,
     },
-    crisisResolutionTitle: "The Biosphere-Tech Compromise Accord",
-    crisisResolutionText: `In response to the disruption, global leaders ratified a hybrid policy: subsidizing specialized planetary adaptive tech while imposing strict, localized resource quotas. Carbon emissions are partially buffered, though short-term market friction reduces overall production efficiency.`,
+    crisisResolutionTitle: "Integrated Match-Day Mitigation Accord",
+    crisisResolutionText: `In response to the incident, the operations console enacted a combined gate-splitting and shift-rotation plan. Crowds are filtered smoothly via computer vision assistance, and volunteer burnout is buffered, though bus logistics experience slight delays.`,
   };
 }
 
@@ -243,9 +247,9 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`[Aethera Server] Active and listening on port ${PORT}`);
-    console.log(`[Aethera Server] Mode: ${process.env.NODE_ENV || "development"}`);
-    console.log(`[Aethera Server] Gemini API Status: ${process.env.GEMINI_API_KEY ? "CONFIGURED" : "FALLBACK_MODE"}`);
+    console.log(`[SmartStadium Server] Active and listening on port ${PORT}`);
+    console.log(`[SmartStadium Server] Mode: ${process.env.NODE_ENV || "development"}`);
+    console.log(`[SmartStadium Server] Gemini API Status: ${process.env.GEMINI_API_KEY ? "CONFIGURED" : "FALLBACK_MODE"}`);
   });
 }
 

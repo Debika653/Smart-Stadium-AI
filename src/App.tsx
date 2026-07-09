@@ -9,15 +9,12 @@ import { SimulationControls } from "./components/SimulationControls";
 import { HistoricalCharts } from "./components/HistoricalCharts";
 import {
   Globe,
-  Database,
   History,
-  AlertTriangle,
   Info,
   Layers,
   Sparkles,
   Server,
   HelpCircle,
-  TrendingUp,
   LogOut,
   Shield,
 } from "lucide-react";
@@ -97,39 +94,39 @@ export default function App() {
   // Compute Agent Satisfaction Indexes dynamically
   const calculateSatisfaction = (sysState: SystemState, polState: PolicyState) => {
     return {
-      sovereign: Math.round(
+      stadium_ops: Math.round(
         Math.min(
           100,
           Math.max(
             0,
-            (sysState.gdp / 140) * 45 + (polState.resourceQuota / 100) * 40 - (polState.carbonTax / 100) * 20
+            sysState.crowdFlow * 0.4 + sysState.transitFlow * 0.4 + (polState.transitDispatch / 100) * 20
           )
         )
       ),
-      eco: Math.round(
+      eco_sustainability: Math.round(
         Math.min(
           100,
           Math.max(
             0,
-            sysState.resources * 0.5 + (2.5 - sysState.co2) * 25 + (polState.carbonTax / 100) * 25
+            (2.0 - sysState.carbonEmission) * 35 + sysState.smartGrid * 0.2 + (polState.greenPower / 100) * 30
           )
         )
       ),
-      tech: Math.round(
+      fan_experience: Math.round(
         Math.min(
           100,
           Math.max(
             0,
-            sysState.tech * 1.8 + (polState.techSubsidies / 100) * 45 + (100 - sysState.resources) * 0.3
+            sysState.staffReadiness * 0.4 + (polState.staffSupport / 80) * 35 + (polState.smartRouting / 100) * 25
           )
         )
       ),
-      citizen: Math.round(
+      safety_security: Math.round(
         Math.min(
           100,
           Math.max(
             0,
-            sysState.social * 0.45 + (polState.welfareDividend / 80) * 45 - (polState.carbonTax / 100) * 10
+            sysState.crowdFlow * 0.5 + sysState.smartGrid * 0.3 + (100 - polState.smartRouting) * 0.1
           )
         )
       ),
@@ -160,11 +157,11 @@ export default function App() {
     const nextYear = state.year + 1;
     let selectedCrisis: CrisisEvent | null = activeCrisis;
 
-    // Standard non-linear environmental hazard selection algorithm:
-    // If no active crisis, and we land on modular interval or have > 1.5°C temp,
-    // trigger an ecological or social stress event.
-    if (!selectedCrisis && nextYear > 2026) {
-      const shouldTrigger = Math.random() < 0.28 || (state.co2 > 1.4 && Math.random() < 0.5);
+    // Standard non-linear stadium event selection algorithm:
+    // If no active crisis, and we land on modular interval or have low staff readiness,
+    // trigger a stadium operations incident.
+    if (!selectedCrisis && nextYear > 1) {
+      const shouldTrigger = Math.random() < 0.35 || (state.staffReadiness < 60 && Math.random() < 0.6);
       if (shouldTrigger) {
         const randomIdx = Math.floor(Math.random() * CRISIS_PRESETS.length);
         selectedCrisis = CRISIS_PRESETS[randomIdx];
@@ -173,15 +170,15 @@ export default function App() {
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second safe API response timeout for structured AI generation
+    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60-second safe API response timeout
 
     try {
       let modifiers = {
-        gdpModifier: 0,
-        resourceModifier: 0,
-        co2Modifier: 0,
-        techModifier: 0,
-        socialModifier: 0,
+        crowdFlowModifier: 0,
+        transitFlowModifier: 0,
+        carbonEmissionModifier: 0,
+        smartGridModifier: 0,
+        staffReadinessModifier: 0,
       };
       let decisions: AgentDecision[] | null = null;
       let decreeTitle = "";
@@ -193,19 +190,19 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         signal: controller.signal,
         body: JSON.stringify({
-          gdp: state.gdp,
-          resources: state.resources,
-          co2: state.co2,
-          tech: state.tech,
-          social: state.social,
-          carbonTax: policies.carbonTax,
-          techSubsidies: policies.techSubsidies,
-          resourceQuota: policies.resourceQuota,
-          welfareDividend: policies.welfareDividend,
+          crowdFlow: state.crowdFlow,
+          transitFlow: state.transitFlow,
+          carbonEmission: state.carbonEmission,
+          smartGrid: state.smartGrid,
+          staffReadiness: state.staffReadiness,
+          greenPower: policies.greenPower,
+          smartRouting: policies.smartRouting,
+          transitDispatch: policies.transitDispatch,
+          staffSupport: policies.staffSupport,
           crisisEvent: selectedCrisis || {
-            title: "Planetary Equilibrium",
+            title: "Stadium Equilibrium Normal",
             severity: 1,
-            description: "No acute biosphere stress events detected. System operating on default feedback cycles.",
+            description: "No acute operational stresses detected. Pedestrian throughput flowing smoothly.",
           },
         }),
       });
@@ -224,55 +221,56 @@ export default function App() {
       }
 
       // Execute System Dynamics Equations incorporating Gemini decision coefficients
-      // 1. GDP Core loop (Base growth modified by resource cap quotas, welfare dividend stimulus, taxes, and agent modifiers)
-      const gdpBaseGrowth = 0.022; // 2.2% base growth
-      const taxDrag = (policies.carbonTax / 100) * 0.008; // carbon tax slightly slows production
-      const quotaDrag = policies.resourceQuota < 40 ? (40 - policies.resourceQuota) * 0.0012 : 0; // strict material caps restrict output
-      const welfareStimulus = (policies.welfareDividend / 100) * 0.004; // welfare boosts local consumer demand
-      const techBonus = (state.tech / 100) * 0.008; // high tech raises industrial efficiency
-      const resourceShortageDrag = state.resources < 50 ? (50 - state.resources) * 0.0015 : 0; // raw shortage slows supply chain
+      // 1. Crowd Flow Core Loop (Influenced by routing tech, staff support, and safety parameters)
+      const crowdBaseGain = 0.5;
+      const staffBoost = (state.staffReadiness / 100) * 1.5;
+      const routingEfficiency = (policies.smartRouting / 100) * 1.8;
+      const gridBonus = (state.smartGrid / 100) * 1.2;
+      const transitBottleneck = state.transitFlow < 50 ? (50 - state.transitFlow) * 0.15 : 0;
       
-      const gdpGrowthRate = gdpBaseGrowth - taxDrag - quotaDrag + welfareStimulus + techBonus - resourceShortageDrag + (modifiers.gdpModifier || 0);
-      const nextGdp = Math.max(50.0, state.gdp * (1 + gdpGrowthRate));
+      const crowdFlowGain = crowdBaseGain + staffBoost + routingEfficiency + gridBonus - transitBottleneck + (modifiers.crowdFlowModifier || 0);
+      const nextCrowdFlow = Math.min(100.0, Math.max(30.0, state.crowdFlow + crowdFlowGain));
 
-      // 2. Natural Capital Depletion (GDP drives depletion; tech increases recovery; caps throttle extraction)
-      const baseConsumption = (nextGdp / 110) * 1.15; // GDP material footprint
-      const extractionThrottled = baseConsumption * (policies.resourceQuota / 100);
-      const techEfficiency = 1 - (state.tech / 150) * 0.6; // recycled resource substitution
-      const netDepletion = extractionThrottled * techEfficiency;
-      const naturalRegen = state.resources > 70 ? 0.25 : 0.05; // slight soil/biome natural regeneration
-      const nextResources = Math.min(100.0, Math.max(0.0, state.resources - netDepletion + naturalRegen + (modifiers.resourceModifier || 0)));
-
-      // 3. Carbon Emissions and Warming Rise (GDP drives emissions; tax & tech reduce it; planetary limits feedback)
-      const carbonIntensity = 0.038; // global CO2 growth coefficient
-      const emissionsMitigation = (policies.carbonTax / 100) * 0.015 + (state.tech / 100) * 0.02; // taxes + scrubbers suppress carbon
-      const netEmissions = Math.max(0.0, (nextGdp * carbonIntensity) * (1 - emissionsMitigation));
-      const temperatureFeedbackOffset = (nextResources < 50 ? (50 - nextResources) * 0.002 : 0); // reduced carbon sinks speed warming
-      const nextCo2 = Math.min(4.0, Math.max(0.8, state.co2 + (netEmissions * 0.02) + temperatureFeedbackOffset + (modifiers.co2Modifier || 0)));
-
-      // 4. Technology Acceleration Index (Subsidies from GDP fund lab breakthroughs)
-      const techBaseGain = 0.4;
-      const subsidyFunding = (nextGdp * 0.01) * (policies.techSubsidies / 100);
-      const techAdvancement = techBaseGain + subsidyFunding + (modifiers.techModifier || 0);
-      const nextTech = Math.max(1.0, state.tech + techAdvancement);
-
-      // 5. Social Stability index (Friction of high warming, low resources, poor welfare, or fast automation)
-      const baseStabilityLoss = (nextCo2 > 1.5 ? (nextCo2 - 1.5) * 4.2 : 0); // climate severe weather cost
-      const resourceShortagePain = nextResources < 60 ? (60 - nextResources) * 0.75 : 0; // high commodity prices
-      const taxPain = (policies.carbonTax / 100) * 1.5; // cost of living tax pinch
-      const dividendHappiness = (policies.welfareDividend / 80) * 6.5; // direct social dividends
-      const techAutomationPain = nextTech > 50 ? (nextTech - 50) * 0.12 : 0; // job automation displacement friction
+      // 2. Transit Logistics (Dispatching rates fund buses, crowd backpressure limits speed)
+      const transitBaseGain = 0.4;
+      const dispatchBonus = (policies.transitDispatch / 100) * 2.8;
+      const smartGridBonus = (state.smartGrid / 100) * 1.5;
+      const gateCrushDelay = state.crowdFlow < 60 ? (60 - state.crowdFlow) * 0.12 : 0;
       
-      const netSocialChange = dividendHappiness - baseStabilityLoss - resourceShortagePain - taxPain - techAutomationPain + (modifiers.socialModifier || 0);
-      const nextSocial = Math.min(100.0, Math.max(0.0, state.social + netSocialChange));
+      const transitGain = transitBaseGain + dispatchBonus + smartGridBonus - gateCrushDelay + (modifiers.transitFlowModifier || 0);
+      const nextTransitFlow = Math.min(100.0, Math.max(30.0, state.transitFlow + transitGain));
+
+      // 3. Carbon Emissions (Green Power decreases it, shuttle traffic and crowd surges increase it)
+      const baseEmissions = 1.35;
+      const solarReduction = (policies.greenPower / 100) * 0.45;
+      const routingReduction = (policies.smartRouting / 100) * 0.15;
+      const activeTransitLoad = (policies.transitDispatch / 100) * 0.25; // active shuttles burn energy
+      
+      const emissionsCalculation = baseEmissions - solarReduction - routingReduction + activeTransitLoad + (modifiers.carbonEmissionModifier || 0);
+      const nextCarbonEmission = Math.min(3.0, Math.max(0.1, emissionsCalculation));
+
+      // 4. Smart Grid technology advancement
+      const techBaseGain = 0.3;
+      const budgetSubsidy = (policies.smartRouting / 100) * 1.6;
+      
+      const techGain = techBaseGain + budgetSubsidy + (modifiers.smartGridModifier || 0);
+      const nextSmartGrid = Math.min(100.0, Math.max(10.0, state.smartGrid + techGain));
+
+      // 5. Volunteer/Staff Readiness (Support boosts morale, gate congestion causes burnout)
+      const staffBaseMorale = (policies.staffSupport / 80) * 4.5;
+      const gateConcourseStress = state.crowdFlow < 70 ? (70 - state.crowdFlow) * 0.18 : 0;
+      const solarWorkloads = policies.greenPower > 70 ? 0.4 : 0; // extra compost audits
+      
+      const staffChange = staffBaseMorale - gateConcourseStress - solarWorkloads + (modifiers.staffReadinessModifier || 0);
+      const nextStaffReadiness = Math.min(100.0, Math.max(25.0, state.staffReadiness + staffChange));
 
       const updatedState: SystemState = {
         year: nextYear,
-        gdp: nextGdp,
-        resources: nextResources,
-        co2: nextCo2,
-        tech: nextTech,
-        social: nextSocial,
+        crowdFlow: nextCrowdFlow,
+        transitFlow: nextTransitFlow,
+        carbonEmission: nextCarbonEmission,
+        smartGrid: nextSmartGrid,
+        staffReadiness: nextStaffReadiness,
       };
 
       setState(updatedState);
@@ -284,8 +282,8 @@ export default function App() {
         policies: { ...policies },
         activeCrisis: selectedCrisis,
         agentDecisions: decisions,
-        decreeTitle: decreeTitle || (selectedCrisis ? "Cabinet Decree Formulated" : "Equilibrium Maintained"),
-        decreeText: decreeText || (selectedCrisis ? "Factions compromised on resource redistribution." : "Planetary variables stable. Normal development cycles progressed."),
+        decreeTitle: decreeTitle || (selectedCrisis ? "Operations Decree Formulated" : "Consensus Maintained"),
+        decreeText: decreeText || (selectedCrisis ? "Delegates compromised on auxiliary stadium resource redistribution." : "Operational telemetry stable. Match day progressed with smooth spectator handovers."),
       };
 
       setHistory((prev) => [...prev, tickLog]);
@@ -295,14 +293,14 @@ export default function App() {
       setActiveCrisis(null);
     } catch (err) {
       console.error("Tick calculation failed:", err);
-      // Clean fallback step run to prevent UI hangs or freeze:
+      // Clean fallback step run to prevent UI hangs or freeze
       const fallbackState: SystemState = {
         year: nextYear,
-        gdp: state.gdp * 1.012,
-        resources: Math.max(0, state.resources - 1.2),
-        co2: state.co2 + 0.022,
-        tech: state.tech + 0.5,
-        social: Math.max(0, state.social - 0.8),
+        crowdFlow: Math.max(30, state.crowdFlow - 2.5),
+        transitFlow: Math.max(30, state.transitFlow - 1.8),
+        carbonEmission: Math.min(3, state.carbonEmission + 0.05),
+        smartGrid: Math.min(100, state.smartGrid + 0.5),
+        staffReadiness: Math.max(25, state.staffReadiness - 1.2),
       };
       setState(fallbackState);
       setHistory((prev) => [
@@ -369,14 +367,14 @@ export default function App() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xs font-bold tracking-[0.3em] uppercase text-[#888] font-mono">
-                SmartStadiumAI <span className="text-white">Engine v2.5</span>
+                SmartStadiumAI <span className="text-white">Console v2.5</span>
               </h1>
               <span className="text-[8px] font-mono bg-[#10B981]/5 border border-[#10B981]/20 text-[#10B981] px-1.5 py-0.2 rounded font-semibold uppercase tracking-wider">
                 CORE SYSTEM ACTIVE
               </span>
             </div>
             <p className="text-[10px] text-[#555] tracking-widest uppercase mt-0.5">
-              Socioeconomic & Biosphere Simulation Model
+              Tournament Logistics & Smart Stadium Digital Twin Model
             </p>
           </div>
         </div>
@@ -393,8 +391,8 @@ export default function App() {
 
           <div className="bg-[#0D0D0D] border border-[#1A1A1A] px-3 py-1.5 rounded flex items-center gap-2 font-mono">
             <Globe className="w-3.5 h-3.5 text-[#10B981]" />
-            <span className="text-[9px] text-[#555] uppercase tracking-wider">Simulated Year:</span>
-            <span className="text-xs font-semibold text-white">{state.year} AD</span>
+            <span className="text-[9px] text-[#555] uppercase tracking-wider">Simulation Step:</span>
+            <span className="text-xs font-semibold text-white">Step {state.year}</span>
           </div>
 
           <div className="bg-[#0D0D0D] border border-[#1A1A1A] px-3 py-1.5 rounded flex items-center gap-2 font-mono">
@@ -657,7 +655,7 @@ export default function App() {
               </div>
               <div>
                 <h3 className="font-sans font-medium text-white text-xs tracking-wider uppercase">
-                  Cabinet Historical Decrees & Logs
+                  Operations Historical Decrees & Logs
                 </h3>
                 <p className="text-[10px] text-[#555] font-mono tracking-widest">
                   SIMULATION TIMELINE RECORDS
@@ -681,14 +679,14 @@ export default function App() {
                       }`}
                     >
                       <div>
-                        <div className="text-xs font-semibold font-mono">Year {log.year} AD</div>
+                        <div className="text-xs font-semibold font-mono">Step {log.year}</div>
                         <div className="text-[9.5px] truncate max-w-[150px] font-sans text-slate-500 mt-0.5">
                           {log.decreeTitle || "System Stable"}
                         </div>
                       </div>
                       {log.activeCrisis && (
                         <span className="text-[8px] font-mono bg-red-950/40 text-red-400 border border-red-900/30 px-1.5 py-0.2 rounded">
-                          CRISIS ACT
+                          INCIDENT
                         </span>
                       )}
                     </button>
@@ -702,39 +700,39 @@ export default function App() {
                   <div>
                     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1A1A1A] pb-2 mb-3">
                       <h4 className="font-sans font-semibold text-white text-xs tracking-tight">
-                        {selectedLog.decreeTitle || "Equilibrium Stable Development"}
+                        {selectedLog.decreeTitle || "Equilibrium Stable Operation"}
                       </h4>
                       <span className="text-[10px] font-mono text-[#10B981]">
-                        Record AD {selectedLog.year}
+                        Record Step {selectedLog.year}
                       </span>
                     </div>
                     <p className="text-[11px] text-[#AAA] leading-relaxed font-sans italic pr-4">
-                      {selectedLog.decreeText || "The planetary variables adjusted dynamically according to default system feedbacks. Multi-agent alignments remained unchanged."}
+                      {selectedLog.decreeText || "The stadium operational variables adjusted dynamically according to default feedback loops. Multi-agent alignments remained cooperative."}
                     </p>
 
                     {/* Policies snapshot of that year */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4 pt-3.5 border-t border-[#1A1A1A]">
                       <div className="bg-[#080808] p-2 rounded border border-[#1A1A1A]">
-                        <span className="text-[8px] font-mono text-[#555] uppercase block">Carbon Tax</span>
-                        <span className="text-[10.5px] font-mono text-[#10B981] font-semibold">{selectedLog.policies.carbonTax}%</span>
+                        <span className="text-[8px] font-mono text-[#555] uppercase block">Green Power</span>
+                        <span className="text-[10.5px] font-mono text-[#10B981] font-semibold">{selectedLog.policies.greenPower}%</span>
                       </div>
                       <div className="bg-[#080808] p-2 rounded border border-[#1A1A1A]">
-                        <span className="text-[8px] font-mono text-[#555] uppercase block">R&D Subsidies</span>
-                        <span className="text-[10.5px] font-mono text-[#10B981] font-semibold">{selectedLog.policies.techSubsidies}%</span>
+                        <span className="text-[8px] font-mono text-[#555] uppercase block">AI Routing</span>
+                        <span className="text-[10.5px] font-mono text-[#10B981] font-semibold">{selectedLog.policies.smartRouting}%</span>
                       </div>
                       <div className="bg-[#080808] p-2 rounded border border-[#1A1A1A]">
-                        <span className="text-[8px] font-mono text-[#555] uppercase block">Extraction Cap</span>
-                        <span className="text-[10.5px] font-mono text-[#10B981] font-semibold">{selectedLog.policies.resourceQuota}%</span>
+                        <span className="text-[8px] font-mono text-[#555] uppercase block">Shuttle Dispatch</span>
+                        <span className="text-[10.5px] font-mono text-[#10B981] font-semibold">{selectedLog.policies.transitDispatch}%</span>
                       </div>
                       <div className="bg-[#080808] p-2 rounded border border-[#1A1A1A]">
-                        <span className="text-[8px] font-mono text-[#555] uppercase block">Welfare Dividend</span>
-                        <span className="text-[10.5px] font-mono text-[#10B981] font-semibold">{selectedLog.policies.welfareDividend}%</span>
+                        <span className="text-[8px] font-mono text-[#555] uppercase block">Staff Support</span>
+                        <span className="text-[10.5px] font-mono text-[#10B981] font-semibold">{selectedLog.policies.staffSupport}%</span>
                       </div>
                     </div>
                   </div>
                 ) : (
                   <div className="flex-grow flex items-center justify-center text-center text-[11px] text-[#555] italic">
-                    Select a year from the timeline records to view cabinet decree summaries and policy snapshots.
+                    Select a step from the timeline records to view operations logs and slider snapshots.
                   </div>
                 )}
               </div>
@@ -759,37 +757,37 @@ export default function App() {
                   <Info className="w-4 h-4" />
                 </div>
                 <h3 className="font-sans font-bold text-white text-xs tracking-wider uppercase">
-                  SmartStadiumAI Operations & Strategy Manual
+                  SmartStadiumAI Operations Strategy Manual
                 </h3>
               </div>
 
               {/* Instructions text */}
               <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar text-[11.5px] leading-relaxed text-[#AAA] font-sans">
                 <p>
-                  Welcome, Sovereign Arbiter. Your task is to maintain systemic balance across the SmartStadiumAI Digital Twin. You must navigate complex positive and negative feedback loops across ecological, financial, and societal variables:
+                  Welcome, Control Operator. Your task is to maintain systemic balance across the SmartStadiumAI Digital Twin. You must navigate complex positive and negative feedback loops across crowd, transit, and volunteer readiness:
                 </p>
                 <div className="space-y-2 border-l border-[#1A1A1A] pl-4">
                   <p>
-                    <strong className="text-[#f59e0b]">Global Production (GDP):</strong> Drives economic capacity. Essential to fund R&D and pay social welfare, but depletes Natural Capital and accelerates CO2 emissions.
+                    <strong className="text-[#fbbf24]">Crowd Safety & Flow:</strong> Drives spectator security and evacuation times. Critical to guide pedestrians during emergencies.
                   </p>
                   <p>
-                    <strong className="text-[#10B981]">Natural Capital:</strong> Essential material foundation. Below 45%, severe resource scarcity triggers economic friction, high inflation, and intense social unrest.
+                    <strong className="text-[#10B981]">Transit Logistics:</strong> Primary public transportation and shuttle efficiency. Prevents terminal blockages.
                   </p>
                   <p>
-                    <strong className="text-rose-500">Atmospheric Temp Rise:</strong> Greenhouse warming. Rising above 1.5°C accelerates crop failures and severe feedback damage, rapidly eroding social stability.
+                    <strong className="text-rose-500">Carbon Footprint:</strong> Match-day emission rate. High emissions violate zero-waste policies and compromise green sustainability ratings.
                   </p>
                   <p>
-                    <strong className="text-[#22d3ee]">Technology Index:</strong> Biosphere-saving multiplier. Accelerates carbon scrubbers, fusion clean-energy gains, and advanced recycling.
+                    <strong className="text-[#22d3ee]">AI Smart Grid:</strong> IoT tech and computer vision index. Aids crowd-flow predictions and optimizes dynamic shuttle route allocations.
                   </p>
                   <p>
-                    <strong className="text-[#ec4899]">Social Stability:</strong> Global societal cohesion. If stability drifts to 0%, systemic civil breakdown halts production completely.
+                    <strong className="text-[#ec4899]">Volunteer Readiness:</strong> Staff morale and assistance availability. Essential to resolve queue congestion and help disabled spectators.
                   </p>
                 </div>
                 <h4 className="font-sans font-semibold text-white text-xs tracking-tight mt-3 uppercase font-mono">
-                  Autonomous AI Council Factions:
+                  Autonomous AI Council Delegates:
                 </h4>
                 <p>
-                  Four cognitively distinct AI Factions (powered by Gemini server-side) negotiate, debate, and vote on crisis resolutions. You can override global policy sliders to direct investments, but remember: making one faction too happy might alienate or trigger hostility from other critical sectors!
+                  Four cognitively distinct stadium coordinators (powered by Gemini server-side) negotiate, debate, and vote on operational decrees. You can override global policy sliders to redirect investments, but remember: making one coordinator too happy might alienate other departments!
                 </p>
               </div>
 

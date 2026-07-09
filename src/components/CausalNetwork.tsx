@@ -5,11 +5,11 @@ import { Info, HelpCircle } from "lucide-react";
 
 interface CausalNetworkProps {
   currentValues: {
-    gdp: number;
-    resources: number;
-    co2: number;
-    tech: number;
-    social: number;
+    crowdFlow: number;
+    transitFlow: number;
+    carbonEmission: number;
+    smartGrid: number;
+    staffReadiness: number;
   };
 }
 
@@ -18,16 +18,16 @@ export const CausalNetwork: React.FC<CausalNetworkProps> = ({ currentValues }) =
 
   const formatNodeValue = (id: string) => {
     switch (id) {
-      case "gdp":
-        return `$${currentValues.gdp.toFixed(1)}T`;
-      case "resources":
-        return `${currentValues.resources.toFixed(1)}%`;
-      case "co2":
-        return `+${currentValues.co2.toFixed(2)}°C`;
-      case "tech":
-        return `${currentValues.tech.toFixed(1)}`;
-      case "social":
-        return `${currentValues.social.toFixed(1)}%`;
+      case "crowdFlow":
+        return `${currentValues.crowdFlow.toFixed(1)}%`;
+      case "transitFlow":
+        return `${currentValues.transitFlow.toFixed(1)}%`;
+      case "carbonEmission":
+        return `${currentValues.carbonEmission.toFixed(2)}t`;
+      case "smartGrid":
+        return `${currentValues.smartGrid.toFixed(1)}`;
+      case "staffReadiness":
+        return `${currentValues.staffReadiness.toFixed(1)}%`;
       default:
         return "";
     }
@@ -51,7 +51,7 @@ export const CausalNetwork: React.FC<CausalNetworkProps> = ({ currentValues }) =
     : [];
 
   return (
-    <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded p-5 shadow-sm relative overflow-hidden h-full flex flex-col justify-between">
+    <div id="causal-network-panel" className="bg-[#0D0D0D] border border-[#1A1A1A] rounded p-5 shadow-sm relative overflow-hidden h-full flex flex-col justify-between">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 border-b border-[#1A1A1A] pb-3">
         <div className="flex items-center gap-2">
@@ -63,11 +63,12 @@ export const CausalNetwork: React.FC<CausalNetworkProps> = ({ currentValues }) =
               Causal Feedback Loop
             </h3>
             <p className="text-[10px] text-[#555] font-mono tracking-widest">
-              DIGITAL TWIN BIOSPHERE TOPOLOGY
+              STADIUM TWIN SYSTEM TOPOLOGY
             </p>
           </div>
         </div>
         <button
+          id="btn-reset-map"
           type="button"
           onClick={() => setSelectedNode(null)}
           className="text-[9px] text-[#10B981] font-mono bg-[#10B981]/5 border border-[#10B981]/20 hover:bg-[#10B981]/15 hover:border-[#10B981]/40 px-2.5 py-0.5 rounded uppercase tracking-wider transition-all cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#10B981]/50"
@@ -136,13 +137,13 @@ export const CausalNetwork: React.FC<CausalNetworkProps> = ({ currentValues }) =
             // Curving offset based on connection
             let qx = mx;
             let qy = my;
-            if (conn.from === "gdp" && conn.to === "co2") {
+            if (conn.from === "crowdFlow" && conn.to === "carbonEmission") {
               qx -= 40;
-            } else if (conn.from === "co2" && conn.to === "resources") {
+            } else if (conn.from === "carbonEmission" && conn.to === "transitFlow") {
               qx += 30;
-            } else if (conn.from === "resources" && conn.to === "gdp") {
+            } else if (conn.from === "transitFlow" && conn.to === "crowdFlow") {
               qy -= 30;
-            } else if (conn.from === "gdp" && conn.to === "resources") {
+            } else if (conn.from === "crowdFlow" && conn.to === "transitFlow") {
               qy += 30;
             }
 
@@ -150,7 +151,6 @@ export const CausalNetwork: React.FC<CausalNetworkProps> = ({ currentValues }) =
 
             const isRelated = selectedNode === conn.from || selectedNode === conn.to;
             const isFromActive = selectedNode === conn.from;
-            const isToActive = selectedNode === conn.to;
 
             let strokeColor = conn.type === "positive" ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)";
             let strokeWidth = 1.5;
@@ -271,7 +271,7 @@ export const CausalNetwork: React.FC<CausalNetworkProps> = ({ currentValues }) =
         {!selectedNode && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-[#080808]/90 border border-[#1A1A1A] text-[10px] text-[#888] px-2.5 py-1 rounded font-mono">
             <Info className="w-3.5 h-3.5 text-[#10B981]" />
-            <span>Select nodes to analyze systemic feedback</span>
+            <span>Select nodes to analyze feedback loops</span>
           </div>
         )}
       </div>
@@ -321,9 +321,9 @@ export const CausalNetwork: React.FC<CausalNetworkProps> = ({ currentValues }) =
           </div>
         ) : (
           <div className="text-center py-2 text-[11px] text-[#555] leading-normal italic font-sans">
-            Planetary variables interact with complex non-linear feedbacks.
+            Smart Stadium operations behave as non-linear, adaptive dynamics.
             <br />
-            Adjusting a policy creates systemic multipliers across all nodes.
+            Adjusting logistics sliders pushes positive/negative feedback loops.
           </div>
         )}
       </div>

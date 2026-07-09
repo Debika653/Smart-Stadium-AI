@@ -1,25 +1,25 @@
 /**
- * Aethera Digital Twin Types and Interfaces
+ * Smart Stadium AI Digital Twin Types and Interfaces
  */
 
 export interface SystemState {
-  year: number;
-  gdp: number; // Trillion USD
-  resources: number; // % (0-100)
-  co2: number; // °C temperature deviation above pre-industrial (e.g. 1.25)
-  tech: number; // technology index (0-100+)
-  social: number; // social stability % (0-100)
+  year: number; // Matches the "Match Day" or simulated scenario step
+  crowdFlow: number; // Crowd Safety & Comfort Index (0-100%)
+  transitFlow: number; // Transit & Shuttle Logistics (0-100%)
+  carbonEmission: number; // Carbon Emissions per Match (e.g. 1.28 tons)
+  smartGrid: number; // Smart Stadium Technology score (0-100+)
+  staffReadiness: number; // Volunteer & Staff Readiness (0-100%)
 }
 
 export interface PolicyState {
-  carbonTax: number; // % (0-100)
-  techSubsidies: number; // % (0-100)
-  resourceQuota: number; // % (0-100)
-  welfareDividend: number; // % (0-100)
+  greenPower: number; // Green Energy & Solar Grid Allocation (0-100%)
+  smartRouting: number; // AI Crowd Routing & IoT Tech Subsidy (0-100%)
+  transitDispatch: number; // Transit Shuttles & Dispatching Rate (0-100%)
+  staffSupport: number; // Volunteer Incentives & Support Allocation (0-100%)
 }
 
 export interface AgentDecision {
-  id: "sovereign" | "eco" | "tech" | "citizen";
+  id: "stadium_ops" | "eco_sustainability" | "safety_security" | "fan_experience";
   name: string;
   statement: string;
   internalReasoning: string;
@@ -42,15 +42,15 @@ export interface CrisisEvent {
   title: string;
   severity: number; // 1-10
   description: string;
-  category: "ecological" | "financial" | "social" | "technological";
+  category: "ecological" | "transit" | "safety" | "operational";
 }
 
 export interface SystemModifiers {
-  gdpModifier: number;
-  resourceModifier: number;
-  co2Modifier: number;
-  techModifier: number;
-  socialModifier: number;
+  crowdFlowModifier: number;
+  transitFlowModifier: number;
+  carbonEmissionModifier: number;
+  smartGridModifier: number;
+  staffReadinessModifier: number;
 }
 
 export interface NodePosition {

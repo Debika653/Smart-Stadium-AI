@@ -20,8 +20,8 @@ export const TelemetryGrid: React.FC<TelemetryGridProps> = ({
     if (isAbsDiff) {
       const sign = diff >= 0 ? "+" : "";
       return {
-        text: `${sign}${diff.toFixed(2)}°C`,
-        isPositive: diff < 0, // Temp rise drop is positive
+        text: `${sign}${diff.toFixed(2)}t`,
+        isPositive: diff < 0, // Emission drop is positive
         isZero: diff === 0,
       };
     }
@@ -35,11 +35,11 @@ export const TelemetryGrid: React.FC<TelemetryGridProps> = ({
   };
 
   const trends = {
-    gdp: getPctChange(currentState.gdp, previousState?.gdp),
-    resources: getPctChange(currentState.resources, previousState?.resources),
-    co2: getPctChange(currentState.co2, previousState?.co2, true),
-    tech: getPctChange(currentState.tech, previousState?.tech),
-    social: getPctChange(currentState.social, previousState?.social),
+    crowdFlow: getPctChange(currentState.crowdFlow, previousState?.crowdFlow),
+    transitFlow: getPctChange(currentState.transitFlow, previousState?.transitFlow),
+    carbonEmission: getPctChange(currentState.carbonEmission, previousState?.carbonEmission, true),
+    smartGrid: getPctChange(currentState.smartGrid, previousState?.smartGrid),
+    staffReadiness: getPctChange(currentState.staffReadiness, previousState?.staffReadiness),
   };
 
   // Helper to render mini custom sparkline path
@@ -84,196 +84,196 @@ export const TelemetryGrid: React.FC<TelemetryGridProps> = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-      {/* GDP Card */}
+    <div id="telemetry-grid-section" className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      {/* Crowd Safety Card */}
       <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded p-4 relative overflow-hidden shadow-sm">
         <div className="flex items-start justify-between">
           <div className="p-1.5 rounded border border-[#1A1A1A] bg-[#080808] text-[#f59e0b]">
             <Coins className="w-4 h-4" />
           </div>
-          {renderSparkline("gdp", "#f59e0b")}
+          {renderSparkline("crowdFlow", "#f59e0b")}
         </div>
         <div className="mt-4">
           <p className="text-[10px] font-mono tracking-[0.15em] text-[#555] uppercase">
-            Global Production (GDP)
+            Crowd Safety Index
           </p>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-xl font-light text-white tracking-tight">
-              ${currentState.gdp.toFixed(1)}T
+              {currentState.crowdFlow.toFixed(1)}%
             </span>
             <span
               className={`text-[10px] font-mono font-medium ${
-                trends.gdp.isZero
+                trends.crowdFlow.isZero
                   ? "text-[#555]"
-                  : trends.gdp.isPositive
+                  : trends.crowdFlow.isPositive
                   ? "text-[#10B981]"
                   : "text-rose-500"
               }`}
             >
-              {trends.gdp.text}
+              {trends.crowdFlow.text}
             </span>
           </div>
           <p className="text-[9px] text-[#555] mt-1 italic">
-            Economic output & capital capacity
+            Pedestrian comfort & safety throughput
           </p>
         </div>
       </div>
 
-      {/* Natural Capital Card */}
+      {/* Transit Logistics Card */}
       <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded p-4 relative overflow-hidden shadow-sm">
         <div className="flex items-start justify-between">
           <div className="p-1.5 rounded border border-[#1A1A1A] bg-[#080808] text-[#10B981]">
             <Leaf className="w-4 h-4" />
           </div>
-          {renderSparkline("resources", "#10B981")}
+          {renderSparkline("transitFlow", "#10B981")}
         </div>
         <div className="mt-4">
           <p className="text-[10px] font-mono tracking-[0.15em] text-[#555] uppercase">
-            Natural Capital
+            Transit Logistics
           </p>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-xl font-light text-white tracking-tight">
-              {currentState.resources.toFixed(1)}%
+              {currentState.transitFlow.toFixed(1)}%
             </span>
             <span
               className={`text-[10px] font-mono font-medium ${
-                trends.resources.isZero
+                trends.transitFlow.isZero
                   ? "text-[#555]"
-                  : trends.resources.isPositive
+                  : trends.transitFlow.isPositive
                   ? "text-[#10B981]"
                   : "text-rose-500"
               }`}
             >
-              {trends.resources.text}
+              {trends.transitFlow.text}
             </span>
           </div>
           <p className="text-[9px] text-[#555] mt-1 italic">
-            Material assets & bio-reserves
+            Shuttle, train, & traffic fluidity
           </p>
         </div>
-        {currentState.resources < 45 && (
+        {currentState.transitFlow < 45 && (
           <div className="absolute inset-x-0 bottom-0 bg-rose-950/20 border-t border-rose-900/30 py-0.5 px-3 flex items-center gap-1">
             <ShieldAlert className="w-3 h-3 text-rose-500 shrink-0" />
             <span className="text-[8px] font-mono text-rose-500 uppercase tracking-wider animate-pulse">
-              Severe Depletion Risk
+              Severe Gridlock Delay
             </span>
           </div>
         )}
       </div>
 
-      {/* Atmospheric Temp Rise Card */}
+      {/* Carbon Footprint Card */}
       <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded p-4 relative overflow-hidden shadow-sm">
         <div className="flex items-start justify-between">
           <div className="p-1.5 rounded border border-[#1A1A1A] bg-[#080808] text-[#ef4444]">
             <Thermometer className="w-4 h-4" />
           </div>
-          {renderSparkline("co2", "#ef4444")}
+          {renderSparkline("carbonEmission", "#ef4444")}
         </div>
         <div className="mt-4">
           <p className="text-[10px] font-mono tracking-[0.15em] text-[#555] uppercase">
-            Atmospheric Temp Rise
+            Carbon Footprint
           </p>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-xl font-light text-white tracking-tight">
-              +{currentState.co2.toFixed(2)}°C
+              {currentState.carbonEmission.toFixed(2)}t
             </span>
             <span
               className={`text-[10px] font-mono font-medium ${
-                trends.co2.isZero
+                trends.carbonEmission.isZero
                   ? "text-[#555]"
-                  : trends.co2.isPositive
-                  ? "text-[#10B981]"
+                  : trends.carbonEmission.isPositive
+                  ? "text-[#10B981]" // Drop in carbon emissions is good
                   : "text-rose-500"
               }`}
             >
-              {trends.co2.text}
+              {trends.carbonEmission.text}
             </span>
           </div>
           <p className="text-[9px] text-[#555] mt-1 italic">
-            Degrees over pre-industrial
+            Tons CO2e per active match
           </p>
         </div>
-        {currentState.co2 > 1.5 && (
+        {currentState.carbonEmission > 1.5 && (
           <div className="absolute inset-x-0 bottom-0 bg-red-950/20 border-t border-red-900/30 py-0.5 px-3 flex items-center gap-1">
             <ShieldAlert className="w-3 h-3 text-red-500 shrink-0" />
             <span className="text-[8px] font-mono text-red-500 uppercase tracking-wider animate-pulse">
-              Paris Threshold Exceeded
+              Green Target Exceeded
             </span>
           </div>
         )}
       </div>
 
-      {/* Tech Index Card */}
+      {/* Smart Grid AI Card */}
       <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded p-4 relative overflow-hidden shadow-sm">
         <div className="flex items-start justify-between">
           <div className="p-1.5 rounded border border-[#1A1A1A] bg-[#080808] text-[#22d3ee]">
             <Zap className="w-4 h-4" />
           </div>
-          {renderSparkline("tech", "#22d3ee")}
+          {renderSparkline("smartGrid", "#22d3ee")}
         </div>
         <div className="mt-4">
           <p className="text-[10px] font-mono tracking-[0.15em] text-[#555] uppercase">
-            Technology Index
+            AI Smart Grid
           </p>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-xl font-light text-white tracking-tight">
-              {currentState.tech.toFixed(1)}
+              {currentState.smartGrid.toFixed(1)}
             </span>
             <span
               className={`text-[10px] font-mono font-medium ${
-                trends.tech.isZero
+                trends.smartGrid.isZero
                   ? "text-[#555]"
-                  : trends.tech.isPositive
+                  : trends.smartGrid.isPositive
                   ? "text-[#10B981]"
                   : "text-rose-500"
               }`}
             >
-              {trends.tech.text}
+              {trends.smartGrid.text}
             </span>
           </div>
           <p className="text-[9px] text-[#555] mt-1 italic">
-            Biosphere-saving efficiency
+            IoT sensors & computer vision capacity
           </p>
         </div>
       </div>
 
-      {/* Social Stability Card */}
+      {/* Volunteer Readiness Card */}
       <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded p-4 relative overflow-hidden shadow-sm">
         <div className="flex items-start justify-between">
           <div className="p-1.5 rounded border border-[#1A1A1A] bg-[#080808] text-[#ec4899]">
             <Users className="w-4 h-4" />
           </div>
-          {renderSparkline("social", "#ec4899")}
+          {renderSparkline("staffReadiness", "#ec4899")}
         </div>
         <div className="mt-4">
           <p className="text-[10px] font-mono tracking-[0.15em] text-[#555] uppercase">
-            Social Stability
+            Volunteer Readiness
           </p>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-xl font-light text-white tracking-tight">
-              {currentState.social.toFixed(1)}%
+              {currentState.staffReadiness.toFixed(1)}%
             </span>
             <span
               className={`text-[10px] font-mono font-medium ${
-                trends.social.isZero
+                trends.staffReadiness.isZero
                   ? "text-[#555]"
-                  : trends.social.isPositive
+                  : trends.staffReadiness.isPositive
                   ? "text-[#10B981]"
                   : "text-rose-500"
               }`}
             >
-              {trends.social.text}
+              {trends.staffReadiness.text}
             </span>
           </div>
           <p className="text-[9px] text-[#555] mt-1 italic">
-            Cohesion & institutional health
+            Staff morale & translation assistance
           </p>
         </div>
-        {currentState.social < 50 && (
+        {currentState.staffReadiness < 50 && (
           <div className="absolute inset-x-0 bottom-0 bg-pink-950/20 border-t border-pink-900/30 py-0.5 px-3 flex items-center gap-1">
             <ShieldAlert className="w-3 h-3 text-pink-500 shrink-0" />
             <span className="text-[8px] font-mono text-pink-500 uppercase tracking-wider animate-pulse">
-              Unrest Risk Critical
+              Volunteer Exhaustion Alert
             </span>
           </div>
         )}
