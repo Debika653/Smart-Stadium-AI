@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { SimulationTickLog } from "../types";
 import { AreaChart, Activity } from "lucide-react";
 
@@ -6,7 +6,7 @@ interface HistoricalChartsProps {
   history: SimulationTickLog[];
 }
 
-export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ history }) => {
+export const HistoricalCharts = memo(({ history }: HistoricalChartsProps) => {
   const [chartMode, setChartMode] = useState<"vitals" | "sustainability">("vitals");
 
   if (history.length < 2) {
@@ -273,4 +273,6 @@ export const HistoricalCharts: React.FC<HistoricalChartsProps> = ({ history }) =
       </div>
     </div>
   );
-};
+}, (prev, next) => {
+  return prev.history.length === next.history.length;
+});

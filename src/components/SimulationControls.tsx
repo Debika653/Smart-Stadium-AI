@@ -72,7 +72,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               value={policies.greenPower}
               onChange={(e) => handleSliderChange("greenPower", parseInt(e.target.value))}
               disabled={isSimulating}
-              className="w-full h-1 bg-[#1A1A1A] rounded appearance-none cursor-pointer accent-[#10B981] focus:outline-none focus:ring-0 disabled:opacity-40 text-xs"
+              className="w-full h-1 bg-[#1A1A1A] rounded appearance-none cursor-pointer accent-[#10B981] focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:ring-offset-2 focus:ring-offset-[#0D0D0D] disabled:opacity-40 text-xs"
               aria-label="Green Power Allocation"
             />
             <div className="flex justify-between text-[8px] text-[#555] font-mono mt-0.5 uppercase tracking-wider">
@@ -95,7 +95,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               value={policies.smartRouting}
               onChange={(e) => handleSliderChange("smartRouting", parseInt(e.target.value))}
               disabled={isSimulating}
-              className="w-full h-1 bg-[#1A1A1A] rounded appearance-none cursor-pointer accent-[#10B981] focus:outline-none focus:ring-0 disabled:opacity-40"
+              className="w-full h-1 bg-[#1A1A1A] rounded appearance-none cursor-pointer accent-[#10B981] focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:ring-offset-2 focus:ring-offset-[#0D0D0D] disabled:opacity-40"
               aria-label="AI Crowd Routing and Tech"
             />
             <div className="flex justify-between text-[8px] text-[#555] font-mono mt-0.5 uppercase tracking-wider">
@@ -118,7 +118,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               value={policies.transitDispatch}
               onChange={(e) => handleSliderChange("transitDispatch", parseInt(e.target.value))}
               disabled={isSimulating}
-              className="w-full h-1 bg-[#1A1A1A] rounded appearance-none cursor-pointer accent-[#10B981] focus:outline-none focus:ring-0 disabled:opacity-40"
+              className="w-full h-1 bg-[#1A1A1A] rounded appearance-none cursor-pointer accent-[#10B981] focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:ring-offset-2 focus:ring-offset-[#0D0D0D] disabled:opacity-40"
               aria-label="Transit Shuttles Dispatch"
             />
             <div className="flex justify-between text-[8px] text-[#555] font-mono mt-0.5 uppercase tracking-wider">
@@ -141,7 +141,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
               value={policies.staffSupport}
               onChange={(e) => handleSliderChange("staffSupport", parseInt(e.target.value))}
               disabled={isSimulating}
-              className="w-full h-1 bg-[#1A1A1A] rounded appearance-none cursor-pointer accent-[#10B981] focus:outline-none focus:ring-0 disabled:opacity-40"
+              className="w-full h-1 bg-[#1A1A1A] rounded appearance-none cursor-pointer accent-[#10B981] focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:ring-offset-2 focus:ring-offset-[#0D0D0D] disabled:opacity-40"
               aria-label="Volunteer Incentives & Support"
             />
             <div className="flex justify-between text-[8px] text-[#555] font-mono mt-0.5 uppercase tracking-wider">

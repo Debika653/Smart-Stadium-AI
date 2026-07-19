@@ -9,6 +9,51 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
+// 1. Enterprise Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: referrer; connect-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; frame-ancestors 'self' https://*.run.app https://ai.studio https://*.google.com https://*.googleusercontent.com;"
+  );
+  next();
+});
+
+// 2. Custom Rate Limiter to mitigate DDoS/Brute-Force vectors
+const rateLimitWindowMs = 60 * 1000; // 1 minute
+const maxRequestsPerWindow = 120; // Allow 120 requests/min
+const rateLimitMap = new Map<string, { count: number; windowStart: number }>();
+
+app.use("/api/", (req, res, next) => {
+  const ip = (req.headers["x-forwarded-for"] as string) || req.socket.remoteAddress || "anonymous";
+  const now = Date.now();
+
+  const record = rateLimitMap.get(ip);
+  if (!record) {
+    rateLimitMap.set(ip, { count: 1, windowStart: now });
+    return next();
+  }
+
+  if (now - record.windowStart > rateLimitWindowMs) {
+    record.count = 1;
+    record.windowStart = now;
+    return next();
+  }
+
+  record.count += 1;
+  if (record.count > maxRequestsPerWindow) {
+    return res.status(429).json({
+      error: true,
+      message: "Too many requests. Cyber-defense rate limiting activated. Please slow down.",
+    });
+  }
+
+  next();
+});
+
 app.use(express.json());
 
 // Lazy Gemini API Client Initialization
@@ -58,10 +103,68 @@ app.post("/api/simulation/agent-negotiate", async (req, res) => {
       crisisEvent,
     } = req.body;
 
+    // A. Robust Input Validation & Sanitization (Defending against XSS & parameter tampering)
+    const validateNum = (val: any, min: number, max: number, fallback: number): number => {
+      const parsed = parseFloat(val);
+      if (isNaN(parsed)) return fallback;
+      return Math.min(max, Math.max(min, parsed));
+    };
+
+    const cleanCrowdFlow = validateNum(crowdFlow, 0, 100, 85.0);
+    const cleanTransitFlow = validateNum(transitFlow, 0, 100, 82.0);
+    const cleanCarbonEmission = validateNum(carbonEmission, 0, 10.0, 1.28);
+    const cleanSmartGrid = validateNum(smartGrid, 0, 100, 15.0);
+    const cleanStaffReadiness = validateNum(staffReadiness, 0, 100, 78.0);
+    const cleanGreenPower = validateNum(greenPower, 0, 100, 40.0);
+    const cleanSmartRouting = validateNum(smartRouting, 0, 100, 30.0);
+    const cleanTransitDispatch = validateNum(transitDispatch, 10, 100, 50.0);
+    const cleanStaffSupport = validateNum(staffSupport, 0, 100, 20.0);
+
+    // B. Prompt Injection and XSS mitigation sanitization for text fields
+    const sanitizeText = (val: any, limit: number): string => {
+      if (typeof val !== "string") return "";
+      let cleaned = val.trim().substring(0, limit);
+      // Remove tags to mitigate HTML/XSS injection
+      cleaned = cleaned.replace(/<[^>]*>/g, "");
+      
+      // Deflect Prompt Injection tricks targeting system instructions
+      const exploitTerms = [
+        /ignore\s+previous/gi,
+        /override\s+system/gi,
+        /system\s+instruction/gi,
+        /you\s+are\s+now/gi,
+        /forget\s+all\s+rules/gi,
+        /new\s+role/gi,
+        /instead\s+of\s+stadium/gi
+      ];
+      for (const term of exploitTerms) {
+        if (term.test(cleaned)) {
+          cleaned = cleaned.replace(term, "[DEFLECTED_INJECTION]");
+        }
+      }
+      return cleaned;
+    };
+
+    const cleanCrisisTitle = sanitizeText(crisisEvent?.title || "Stadium Equilibrium Normal", 100);
+    const cleanCrisisDesc = sanitizeText(crisisEvent?.description || "No acute operational stresses detected.", 500);
+    const cleanCrisisSeverity = validateNum(crisisEvent?.severity, 1, 10, 1);
+
     // Check if API key is present; if not, return fallback data gracefully
     if (!process.env.GEMINI_API_KEY) {
       console.warn("GEMINI_API_KEY is not defined. Using rule-based fallback negotiation model.");
-      return res.json(getFallbackNegotiation(crowdFlow, transitFlow, carbonEmission, smartGrid, staffReadiness, crisisEvent));
+      return res.json(getFallbackNegotiation(
+        cleanCrowdFlow,
+        cleanTransitFlow,
+        cleanCarbonEmission,
+        cleanSmartGrid,
+        cleanStaffReadiness,
+        {
+          id: crisisEvent?.id || "normal",
+          title: cleanCrisisTitle,
+          description: cleanCrisisDesc,
+          severity: cleanCrisisSeverity,
+        }
+      ));
     }
 
     const ai = getGeminiClient();
@@ -75,22 +178,22 @@ The delegates are:
 4. Safety Command Center (ID: "safety_security", color: Rose): Focuses on gate entry security, crowd safety indexes, fire code compliance, and direct incident suppression.
 
 Current State Dials:
-- Crowd Safety Index: ${crowdFlow.toFixed(1)}% (critical crowd bottleneck triggers alert)
-- Transit Logistics: ${transitFlow.toFixed(1)}% (shortage triggers gridlock delays)
-- Carbon Footprint: ${carbonEmission.toFixed(2)}t per active match (high emissions damage green compliance)
-- AI Smart Grid Index: ${smartGrid.toFixed(1)} (increases computational computer vision and camera accuracy)
-- Volunteer Readiness: ${staffReadiness.toFixed(1)}% (low readiness triggers volunteer burnout warnings)
+- Crowd Safety Index: ${cleanCrowdFlow.toFixed(1)}% (critical crowd bottleneck triggers alert)
+- Transit Logistics: ${cleanTransitFlow.toFixed(1)}% (shortage triggers gridlock delays)
+- Carbon Footprint: ${cleanCarbonEmission.toFixed(2)}t per active match (high emissions damage green compliance)
+- AI Smart Grid Index: ${cleanSmartGrid.toFixed(1)} (increases computational computer vision and camera accuracy)
+- Volunteer Readiness: ${cleanStaffReadiness.toFixed(1)}% (low readiness triggers volunteer burnout warnings)
 
 Active Executive Sliders:
-- Green Solar Power Allocation: ${greenPower}%
-- AI Crowd Routing & Tech: ${smartRouting}%
-- Transit Shuttles Dispatch: ${transitDispatch}%
-- Volunteer Incentives & Support: ${staffSupport}%
+- Green Solar Power Allocation: ${cleanGreenPower}%
+- AI Crowd Routing & Tech: ${cleanSmartRouting}%
+- Transit Shuttles Dispatch: ${cleanTransitDispatch}%
+- Volunteer Incentives & Support: ${cleanStaffSupport}%
 
 Active Match-Day Incident:
-Title: "${crisisEvent.title}"
-Severity: ${crisisEvent.severity}/10
-Description: "${crisisEvent.description}"
+Title: "${cleanCrisisTitle}"
+Severity: ${cleanCrisisSeverity}/10
+Description: "${cleanCrisisDesc}"
 
 Analyze how this incident affects each operational department, trigger a simulated logistics debate, and output a detailed decision matrix. Each delegate has 10 negotiation tokens. They allocate them to proposals that resolve the bottleneck in their favor.
 Provide:

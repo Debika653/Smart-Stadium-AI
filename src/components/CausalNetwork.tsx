@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { CAUSAL_NODES, CAUSAL_CONNECTIONS } from "../data";
 import { NodePosition, NodeConnection } from "../types";
 import { Info, HelpCircle } from "lucide-react";
@@ -13,7 +13,7 @@ interface CausalNetworkProps {
   };
 }
 
-export const CausalNetwork: React.FC<CausalNetworkProps> = ({ currentValues }) => {
+export const CausalNetwork = memo(({ currentValues }: CausalNetworkProps) => {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   const formatNodeValue = (id: string) => {
@@ -329,4 +329,12 @@ export const CausalNetwork: React.FC<CausalNetworkProps> = ({ currentValues }) =
       </div>
     </div>
   );
-};
+}, (prev, next) => {
+  return (
+    prev.currentValues.crowdFlow === next.currentValues.crowdFlow &&
+    prev.currentValues.transitFlow === next.currentValues.transitFlow &&
+    prev.currentValues.carbonEmission === next.currentValues.carbonEmission &&
+    prev.currentValues.smartGrid === next.currentValues.smartGrid &&
+    prev.currentValues.staffReadiness === next.currentValues.staffReadiness
+  );
+});
